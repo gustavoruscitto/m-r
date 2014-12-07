@@ -25,7 +25,7 @@ namespace CQRSGui.Controllers
 
         public ActionResult Details(Guid id)
         {
-            ViewData.Model = _readmodel.GetInventoryItemDetails(id);
+            ViewData.Model = _readmodel.GetInventoryItem(id);
             return View();
         }
 
@@ -44,7 +44,7 @@ namespace CQRSGui.Controllers
 
         public ActionResult ChangeName(Guid id)
         {
-            ViewData.Model = _readmodel.GetInventoryItemDetails(id);
+            ViewData.Model = _readmodel.GetInventoryItem(id);
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace CQRSGui.Controllers
 
         public ActionResult CheckIn(Guid id)
         {
-            ViewData.Model = _readmodel.GetInventoryItemDetails(id);
+            ViewData.Model = _readmodel.GetInventoryItem(id);
             return View();
         }
 
@@ -78,7 +78,7 @@ namespace CQRSGui.Controllers
 
         public ActionResult Remove(Guid id)
         {
-            ViewData.Model = _readmodel.GetInventoryItemDetails(id);
+            ViewData.Model = _readmodel.GetInventoryItem(id);
             return View();
         }
 

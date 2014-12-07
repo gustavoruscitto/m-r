@@ -3,7 +3,7 @@ namespace SimpleCQRS
 {
 	public class Event : Message
 	{
-        public int Version;
+        //public int Version;
 	}
 	
 	public class InventoryItemDeactivated : Event {

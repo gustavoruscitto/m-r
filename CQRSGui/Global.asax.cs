@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using EventStore.ClientAPI;
+using ReadModelDB;
 using SimpleCQRS;
+using StructureMap;
 
 namespace CQRSGui
 {
@@ -25,15 +29,20 @@ namespace CQRSGui
 
         }
 
-        protected void Application_Start()
+        protected async void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
 
             RegisterRoutes(RouteTable.Routes);
+            ObjectFactory.Initialize(
+                cfg => cfg.For<RavenDocStore>().Singleton().Use(new RavenDocStore()));
 
             var bus = new FakeBus();
+            var eventStoreConnection =
+                EventStoreConnection.Create(new IPEndPoint(System.Net.IPAddress.Parse("127.0.0.1"), 1113));
+            await eventStoreConnection.ConnectAsync();
 
-            var storage = new EventStore(bus);
+            var storage = new GetEventStoreRepository(bus,eventStoreConnection);
             var rep = new Repository<InventoryItem>(storage);
             var commands = new InventoryCommandHandlers(rep);
             bus.RegisterHandler<CheckInItemsToInventory>(commands.Handle);
@@ -41,16 +50,12 @@ namespace CQRSGui
             bus.RegisterHandler<DeactivateInventoryItem>(commands.Handle);
             bus.RegisterHandler<RemoveItemsFromInventory>(commands.Handle);
             bus.RegisterHandler<RenameInventoryItem>(commands.Handle);
-            var detail = new InvenotryItemDetailView();
+            var detail = new InventoryItemView();
             bus.RegisterHandler<InventoryItemCreated>(detail.Handle);
             bus.RegisterHandler<InventoryItemDeactivated>(detail.Handle);
             bus.RegisterHandler<InventoryItemRenamed>(detail.Handle);
             bus.RegisterHandler<ItemsCheckedInToInventory>(detail.Handle);
             bus.RegisterHandler<ItemsRemovedFromInventory>(detail.Handle);
-            var list = new InventoryListView();
-            bus.RegisterHandler<InventoryItemCreated>(list.Handle);
-            bus.RegisterHandler<InventoryItemRenamed>(list.Handle);
-            bus.RegisterHandler<InventoryItemDeactivated>(list.Handle);
             ServiceLocator.Bus = bus;
         }
     }
